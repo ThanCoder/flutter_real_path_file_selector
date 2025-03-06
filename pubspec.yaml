@@ -1,7 +1,7 @@
 name: real_path_file_selector
 description: "A new Flutter plugin project."
 version: 0.0.1
-homepage: null
+homepage: https://github.com/ThanCoder/flutter_real_path_file_selector
 
 environment:
   sdk: ^3.7.0
