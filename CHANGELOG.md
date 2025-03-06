@@ -1,4 +1,6 @@
-## 0.0.2
+## 0.0.4 or 0.0.3
+## Fixed
+- fixed file scanner for android platform
 
 ## Fixed
 - auto android storage permission request
