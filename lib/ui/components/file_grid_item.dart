@@ -1,18 +1,17 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:real_path_file_selector/ui/extensions/index.dart';
+import 'package:real_path_file_selector/ui/extensions/string_extension.dart';
 import 'package:real_path_file_selector/ui/models/file_model.dart';
-import 'package:real_path_file_selector/ui/utils/index.dart';
-import 'package:real_path_file_selector/ui/widgets/index.dart';
+import 'package:real_path_file_selector/ui/widgets/core/index.dart';
 
-class FileListItem extends StatelessWidget {
+class FileGridItem extends StatelessWidget {
   List<String>? mimeTypes;
   List<String>? extensions;
   String? thumbnailDirPath;
   FileModel file;
   void Function(FileModel file) onClicked;
-  FileListItem({
+  FileGridItem({
     super.key,
     required this.file,
     required this.onClicked,
@@ -61,37 +60,56 @@ class FileListItem extends StatelessWidget {
     if (file.mime.startsWith('video') && thumbnailDirPath != null) {
       return MyImageFile(
         path: '$thumbnailDirPath/${file.name.getName(withExt: false)}.png',
-        width: 50,
-        height: 50,
       );
     }
 
-    return Icon(_getIconData(), size: 50);
+    return Icon(_getIconData(), size: 120);
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      enabled: _isEnable(),
-      selected: file.isSelected,
-      onTap: () => onClicked(file),
-      leading: _getImage(),
-      title: Column(
-        spacing: 5,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            file.name,
-            style: TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
-          // Text(file.mime),
-          file.type == FileSystemEntityType.directory
-              ? SizedBox()
-              : Text(AppUtil.instance.getParseFileSize(file.size.toDouble())),
-          Text(AppUtil.instance.getParseDate(file.date)),
-        ],
+    return GestureDetector(
+      onTap: () {
+        if (_isEnable()) {
+          onClicked(file);
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color:
+              file.isSelected ? Colors.teal : const Color.fromARGB(45, 0, 0, 0),
+        ),
+        child: Stack(
+          children: [
+            Column(
+              spacing: 5,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Expanded(child: _getImage())],
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(195, 0, 0, 0),
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(5),
+                    bottomLeft: Radius.circular(5),
+                  ),
+                ),
+                child: Text(
+                  file.name,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

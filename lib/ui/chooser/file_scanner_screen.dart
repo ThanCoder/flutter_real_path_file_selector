@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:real_path_file_selector/ui/components/file_grid_item.dart';
 import 'package:real_path_file_selector/ui/components/file_list_item.dart';
+import 'package:real_path_file_selector/ui/enums/list_styles.dart';
 import 'package:real_path_file_selector/ui/enums/sort_types.dart';
 import 'package:real_path_file_selector/ui/models/file_model.dart';
 import 'package:real_path_file_selector/ui/services/file_services.dart';
@@ -11,12 +13,15 @@ import 'package:than_pkg/than_pkg.dart';
 class FileScannerScreen extends StatefulWidget {
   String? title;
   String mimeType;
+  String? thumbnailDirPath;
   void Function(List<String> selectedPath) onSelected;
+
   FileScannerScreen({
     super.key,
     required this.onSelected,
     required this.mimeType,
     this.title,
+    this.thumbnailDirPath,
   });
 
   @override
@@ -38,6 +43,7 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
   String rootPath = '';
   Map<SortTypes, bool> sortType = {SortTypes.date: false};
   int selectedCount = 0;
+  ListStyles style = ListStyles.list;
 
   void init() async {
     try {
@@ -72,6 +78,21 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
         sortType: sortType,
         mimeType: widget.mimeType,
       );
+      //gen cover
+      if (widget.thumbnailDirPath != null) {
+        final videoPathList =
+            fileList
+                .where((f) => f.mime.startsWith('video'))
+                .map((f) => f.path)
+                .toList();
+        await ThanPkg.platform.genVideoCover(
+          outDirPath: widget.thumbnailDirPath!,
+          videoPathList: videoPathList,
+        );
+        print(widget.thumbnailDirPath!);
+      }
+
+      if (!mounted) return;
 
       setState(() {
         isLoading = false;
@@ -146,14 +167,74 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
     widget.onSelected(list);
   }
 
+  Widget _getListWidget() {
+    if (style == ListStyles.grid) {
+      return GridView.builder(
+        itemCount: fileList.length,
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 150,
+          mainAxisExtent: 150,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
+        ),
+        itemBuilder: (context, index) {
+          return FileGridItem(
+            thumbnailDirPath: widget.thumbnailDirPath,
+            file: fileList[index],
+            onClicked: (file) {
+              if (file.type == FileSystemEntityType.directory) {
+                scanPath(file.path);
+                return;
+              }
+              if (file.type == FileSystemEntityType.file) {
+                _toggleSelect(file);
+              }
+            },
+          );
+        },
+      );
+    }
+    return ListView.separated(
+      separatorBuilder: (context, index) => const Divider(),
+      itemCount: fileList.length,
+      itemBuilder: (context, index) {
+        return FileListItem(
+          thumbnailDirPath: widget.thumbnailDirPath,
+          file: fileList[index],
+          onClicked: (file) {
+            if (file.type == FileSystemEntityType.directory) {
+              scanPath(file.path);
+              return;
+            }
+            if (file.type == FileSystemEntityType.file) {
+              _toggleSelect(file);
+            }
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title == null ? 'File Scanner' : widget.title!),
-        // actions: [
-        //   IconButton(onPressed: _showMenu, icon: Icon(Icons.more_vert)),
-        // ],
+        actions: [
+          // IconButton(onPressed: _showMenu, icon: Icon(Icons.more_vert)),
+          IconButton(
+            onPressed: () {
+              final res =
+                  style == ListStyles.list ? ListStyles.grid : ListStyles.list;
+              setState(() {
+                style = res;
+              });
+            },
+            icon: Icon(
+              style == ListStyles.list ? Icons.grid_on_rounded : Icons.list,
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -166,24 +247,7 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
                 onRefresh: () async {
                   await scanPath(currentPath);
                 },
-                child: ListView.separated(
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemCount: fileList.length,
-                  itemBuilder: (context, index) {
-                    return FileListItem(
-                      file: fileList[index],
-                      onClicked: (file) {
-                        if (file.type == FileSystemEntityType.directory) {
-                          scanPath(file.path);
-                          return;
-                        }
-                        if (file.type == FileSystemEntityType.file) {
-                          _toggleSelect(file);
-                        }
-                      },
-                    );
-                  },
-                ),
+                child: _getListWidget(),
               ),
             ),
           selectedCount != 0

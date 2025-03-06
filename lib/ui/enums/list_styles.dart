@@ -1,0 +1,1 @@
+enum ListStyles { list, grid }

@@ -13,6 +13,7 @@ class FileScanner extends MethodChannelRealPathFileSelector {
     BuildContext context, {
     required String mimeType,
     String? title,
+    String? thumbnailDirPath,
   }) async {
     final completer = Completer<List<String>>();
     Navigator.push(
@@ -23,6 +24,7 @@ class FileScanner extends MethodChannelRealPathFileSelector {
               title: title,
               mimeType: mimeType,
               onSelected: completer.complete,
+              thumbnailDirPath: thumbnailDirPath,
             ),
       ),
     );

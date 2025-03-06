@@ -12,12 +12,14 @@ class FileChooserScreen extends StatefulWidget {
   String? title;
   List<String>? mimeTypes;
   List<String>? extensions;
+  String? thumbnailDirPath;
   void Function(List<String> selectedPath) onSelected;
   FileChooserScreen({
     super.key,
     required this.onSelected,
     this.mimeTypes,
     this.title,
+    this.thumbnailDirPath,
   });
 
   @override
@@ -63,16 +65,30 @@ class _FileChooserScreenState extends State<FileChooserScreen> {
 
   Future<void> scanPath(String path) async {
     try {
-      FocusScope.of(context).unfocus();
-
       setState(() {
         isLoading = true;
       });
+
+      FocusScope.of(context).unfocus();
+
       fileList = await FileServices.instance.getList(
         path,
         isShowHidden: isShowHidden,
         sortType: sortType,
       );
+
+      //gen cover
+      if (widget.thumbnailDirPath != null) {
+        final videoPathList =
+            fileList
+                .where((f) => f.mime.startsWith('video'))
+                .map((f) => f.path)
+                .toList();
+        await ThanPkg.platform.genVideoCover(
+          outDirPath: widget.thumbnailDirPath!,
+          videoPathList: videoPathList,
+        );
+      }
 
       setState(() {
         isLoading = false;
@@ -218,6 +234,7 @@ class _FileChooserScreenState extends State<FileChooserScreen> {
                   itemCount: fileList.length,
                   itemBuilder: (context, index) {
                     return FileListItem(
+                      thumbnailDirPath: widget.thumbnailDirPath,
                       mimeTypes: widget.mimeTypes,
                       file: fileList[index],
                       onClicked: (file) {

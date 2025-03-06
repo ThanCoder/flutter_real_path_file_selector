@@ -24,6 +24,10 @@ class TLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SpinKitFadingCircle(size: size, color: Colors.black);
+    final brightness = Theme.of(context).brightness;
+    return SpinKitFadingCircle(
+      size: size,
+      color: brightness == Brightness.dark ? Colors.white : Colors.black,
+    );
   }
 }

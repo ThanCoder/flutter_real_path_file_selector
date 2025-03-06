@@ -73,11 +73,10 @@ class FileServices {
         //scan
         void scan(Directory dir) async {
           try {
-            await for (var file in dir.list()) {
+            for (final file in dir.listSync()) {
               //skip hidden
               final name = file.path.getName();
               if (name.startsWith('.') || filterDir.contains(name)) continue;
-
               if (file.statSync().type == FileSystemEntityType.file) {
                 //check
                 final mime = lookupMimeType(file.path) ?? '';
