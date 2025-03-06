@@ -43,7 +43,7 @@ class _FileChooserScreenState extends State<FileChooserScreen> {
   void init() async {
     try {
       if (Platform.isAndroid &&
-          !await ThanPkg.android.permission.isPackageInstallPermission()) {
+          !await ThanPkg.android.permission.isStoragePermissionGranted()) {
         await ThanPkg.android.permission.requestStoragePermission();
         if (!mounted) return;
         Navigator.pop(context);

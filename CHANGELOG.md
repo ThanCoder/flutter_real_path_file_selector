@@ -1,3 +1,8 @@
+## 0.0.2
+
+## Fixed
+- auto android storage permission request
+
 ## 0.0.1
 
 - flutter realpath file selector
