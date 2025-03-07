@@ -84,9 +84,20 @@ class _FileChooserScreenState extends State<FileChooserScreen> {
                 .where((f) => f.mime.startsWith('video'))
                 .map((f) => f.path)
                 .toList();
+        final pdfPathList =
+            fileList
+                .where((f) => f.mime.startsWith('application/pdf'))
+                .map((f) => f.path)
+                .toList();
+        //gen video thumbnail
         await ThanPkg.platform.genVideoCover(
           outDirPath: widget.thumbnailDirPath!,
           videoPathList: videoPathList,
+        );
+        //gen pdf thumbnail
+        await ThanPkg.platform.genPdfCover(
+          outDirPath: widget.thumbnailDirPath!,
+          pdfPathList: pdfPathList,
         );
       }
 
@@ -149,7 +160,7 @@ class _FileChooserScreenState extends State<FileChooserScreen> {
     selectedCount = 0;
     final res =
         fileList.map((f) {
-          if (f.name == file.name) {
+          if (f.path == file.path) {
             f.isSelected = !f.isSelected;
           }
           if (f.isSelected) {
@@ -175,6 +186,7 @@ class _FileChooserScreenState extends State<FileChooserScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title == null ? 'File Chooser' : widget.title!),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(onPressed: _showMenu, icon: Icon(Icons.more_vert)),
         ],
@@ -251,20 +263,28 @@ class _FileChooserScreenState extends State<FileChooserScreen> {
                 ),
               ),
             ),
-          selectedCount != 0
-              ? Padding(
+          isLoading
+              ? SizedBox.shrink()
+              : Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                      onPressed: _choose,
-                      child: Text('Selected $selectedCount'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('Close'),
                     ),
+                    selectedCount != 0
+                        ? ElevatedButton(
+                          onPressed: _choose,
+                          child: Text('Selected $selectedCount'),
+                        )
+                        : SizedBox.shrink(),
                   ],
                 ),
-              )
-              : SizedBox(),
+              ),
         ],
       ),
     );

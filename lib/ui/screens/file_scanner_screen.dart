@@ -35,8 +35,6 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
     init();
   }
 
-  final TextEditingController pathController = TextEditingController();
-  String currentPath = '';
   List<FileModel> fileList = [];
   bool isLoading = false;
   bool isShowHidden = false;
@@ -45,7 +43,7 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
   int selectedCount = 0;
   ListStyles style = ListStyles.list;
 
-  void init() async {
+  Future<void> init() async {
     try {
       if (Platform.isAndroid &&
           !await ThanPkg.android.permission.isStoragePermissionGranted()) {
@@ -54,26 +52,10 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
         Navigator.pop(context);
         return;
       }
-      rootPath = await ThanPkg.platform.getAppExternalPath() ?? '';
-      setState(() {
-        currentPath = rootPath;
-      });
-      pathController.text = rootPath;
-      scanPath(rootPath);
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
-
-  Future<void> scanPath(String path) async {
-    try {
-      FocusScope.of(context).unfocus();
-
       setState(() {
         isLoading = true;
       });
       fileList = await FileServices.instance.scanList(
-        path,
         isShowHidden: isShowHidden,
         sortType: sortType,
         mimeType: widget.mimeType,
@@ -85,21 +67,37 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
                 .where((f) => f.mime.startsWith('video'))
                 .map((f) => f.path)
                 .toList();
+        final pdfPathList =
+            fileList
+                .where((f) => f.mime.startsWith('application/pdf'))
+                .map((f) => f.path)
+                .toList();
+        //gen video thumbnail
         await ThanPkg.platform.genVideoCover(
           outDirPath: widget.thumbnailDirPath!,
           videoPathList: videoPathList,
         );
-        print(widget.thumbnailDirPath!);
+        //gen pdf thumbnail
+        await ThanPkg.platform.genPdfCover(
+          outDirPath: widget.thumbnailDirPath!,
+          pdfPathList: pdfPathList,
+        );
       }
 
       if (!mounted) return;
 
       setState(() {
         isLoading = false;
-        currentPath = path;
         selectedCount = 0;
       });
-      pathController.text = path;
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> scanPath(String path) async {
+    try {
+      FocusScope.of(context).unfocus();
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -146,7 +144,7 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
     selectedCount = 0;
     final res =
         fileList.map((f) {
-          if (f.name == file.name) {
+          if (f.path == file.path) {
             f.isSelected = !f.isSelected;
           }
           if (f.isSelected) {
@@ -220,6 +218,7 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title == null ? 'File Scanner' : widget.title!),
+        automaticallyImplyLeading: false,
         actions: [
           // IconButton(onPressed: _showMenu, icon: Icon(Icons.more_vert)),
           IconButton(
@@ -245,25 +244,33 @@ class _FileScannerScreenState extends State<FileScannerScreen> {
             Expanded(
               child: RefreshIndicator.noSpinner(
                 onRefresh: () async {
-                  await scanPath(currentPath);
+                  await init();
                 },
                 child: _getListWidget(),
               ),
             ),
-          selectedCount != 0
-              ? Padding(
+          isLoading
+              ? SizedBox.shrink()
+              : Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                      onPressed: _choose,
-                      child: Text('Selected $selectedCount'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text('Close'),
                     ),
+                    selectedCount != 0
+                        ? ElevatedButton(
+                          onPressed: _choose,
+                          child: Text('Selected $selectedCount'),
+                        )
+                        : SizedBox.shrink(),
                   ],
                 ),
-              )
-              : SizedBox(),
+              ),
         ],
       ),
     );

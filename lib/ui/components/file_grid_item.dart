@@ -55,11 +55,12 @@ class FileGridItem extends StatelessWidget {
 
   Widget _getImage() {
     if (file.mime.startsWith('image')) {
-      return MyImageFile(path: file.path);
+      return MyImageFile(path: file.path, width: double.infinity);
     }
     if (file.mime.startsWith('video') && thumbnailDirPath != null) {
       return MyImageFile(
         path: '$thumbnailDirPath/${file.name.getName(withExt: false)}.png',
+        width: double.infinity,
       );
     }
 
@@ -74,41 +75,46 @@ class FileGridItem extends StatelessWidget {
           onClicked(file);
         }
       },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          color:
-              file.isSelected ? Colors.teal : const Color.fromARGB(45, 0, 0, 0),
-        ),
-        child: Stack(
-          children: [
-            Column(
-              spacing: 5,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Expanded(child: _getImage())],
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(195, 0, 0, 0),
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(5),
-                    bottomLeft: Radius.circular(5),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color:
+                file.isSelected
+                    ? Colors.teal
+                    : const Color.fromARGB(45, 0, 0, 0),
+          ),
+          child: Stack(
+            children: [
+              Column(
+                spacing: 5,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [Expanded(child: _getImage())],
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(195, 0, 0, 0),
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(5),
+                      bottomLeft: Radius.circular(5),
+                    ),
+                  ),
+                  child: Text(
+                    file.name,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Colors.white),
                   ),
                 ),
-                child: Text(
-                  file.name,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.white),
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

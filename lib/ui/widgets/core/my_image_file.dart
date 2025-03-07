@@ -25,18 +25,13 @@ class MyImageFile extends StatelessWidget {
   Widget _getImageWidget() {
     final file = File(path);
     if (file.existsSync()) {
-      // final uniqueKey = file.statSync().modified.millisecondsSinceEpoch;
-      return Image.file(
-        file,
-        // key: ValueKey<int>(uniqueKey),
-        fit: fit,
-        width: width,
-        height: height,
-      );
+      return Image.file(file, fit: fit, width: width, height: height);
     } else {
       return Image.asset(
         defaultAssetsPath,
-        fit: fit,
+        fit: BoxFit.fill,
+        width: width,
+        height: height,
       );
     }
   }
@@ -46,9 +41,9 @@ class MyImageFile extends StatelessWidget {
     if (borderRadius > 0) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
-        child: _getImageWidget(),
+        child: Container(color: Colors.white, child: _getImageWidget()),
       );
     }
-    return _getImageWidget();
+    return Container(color: Colors.white, child: _getImageWidget());
   }
 }

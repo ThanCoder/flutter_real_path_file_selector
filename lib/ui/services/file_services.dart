@@ -45,8 +45,7 @@ class FileServices {
     return fileList;
   }
 
-  Future<List<FileModel>> scanList(
-    String path, {
+  Future<List<FileModel>> scanList({
     required Map<SortTypes, bool> sortType,
     required String mimeType,
     bool isShowHidden = false,
@@ -87,7 +86,7 @@ class FileServices {
                 fileList.add(
                   FileModel(
                     name: file.path.getName(),
-                    path: '$path/${file.path.getName()}',
+                    path: file.path,
                     mime: lookupMimeType(file.path) ?? '',
                     type: file.statSync().type,
                     size: file.statSync().size,

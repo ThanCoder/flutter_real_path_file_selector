@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:real_path_file_selector/real_path_file_selector_method_channel.dart';
-import 'package:real_path_file_selector/ui/chooser/file_chooser_screen.dart';
+import 'package:real_path_file_selector/ui/screens/file_chooser_screen.dart';
 
 class FileExplorer extends MethodChannelRealPathFileSelector {
   static final FileExplorer instance = FileExplorer._();

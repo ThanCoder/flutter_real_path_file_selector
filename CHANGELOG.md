@@ -1,3 +1,8 @@
+## 0.0.5
+
+## Added
+- add video,pdf thumbnail 
+
 ## 0.0.4 or 0.0.3
 ## Fixed
 - fixed file scanner for android platform

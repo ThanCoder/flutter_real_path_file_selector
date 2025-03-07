@@ -10,6 +10,7 @@ class FileListItem extends StatelessWidget {
   List<String>? mimeTypes;
   List<String>? extensions;
   String? thumbnailDirPath;
+  double size;
   FileModel file;
   void Function(FileModel file) onClicked;
   FileListItem({
@@ -18,6 +19,7 @@ class FileListItem extends StatelessWidget {
     required this.onClicked,
     this.mimeTypes,
     this.thumbnailDirPath,
+    this.size = 80,
   });
 
   bool _isEnable() {
@@ -56,21 +58,74 @@ class FileListItem extends StatelessWidget {
 
   Widget _getImage() {
     if (file.mime.startsWith('image')) {
-      return MyImageFile(path: file.path);
+      return MyImageFile(path: file.path, width: size, height: size);
     }
     if (file.mime.startsWith('video') && thumbnailDirPath != null) {
       return MyImageFile(
         path: '$thumbnailDirPath/${file.name.getName(withExt: false)}.png',
-        width: 50,
-        height: 50,
+        width: size,
+        height: size,
+      );
+    }
+    if (file.mime.startsWith('application/pdf') && thumbnailDirPath != null) {
+      return MyImageFile(
+        path: '$thumbnailDirPath/${file.name.getName(withExt: false)}.png',
+        width: size,
+        height: size,
       );
     }
 
-    return Icon(_getIconData(), size: 50);
+    return Icon(_getIconData(), size: size);
   }
 
   @override
   Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (_isEnable()) {
+          onClicked(file);
+        }
+      },
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: AnimatedContainer(
+          padding: EdgeInsets.all(5),
+          duration: Duration(milliseconds: 1300),
+          color:
+              file.isSelected ? const Color.fromARGB(132, 52, 187, 173) : null,
+          child: Row(
+            spacing: 10,
+            children: [
+              _getImage(),
+              Expanded(
+                child: Column(
+                  spacing: 5,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      file.name,
+                      style: TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                    // Text(file.mime),
+                    file.type == FileSystemEntityType.directory
+                        ? SizedBox()
+                        : Text(
+                          AppUtil.instance.getParseFileSize(
+                            file.size.toDouble(),
+                          ),
+                        ),
+                    Text(AppUtil.instance.getParseDate(file.date)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    /*
     return ListTile(
       enabled: _isEnable(),
       selected: file.isSelected,
@@ -94,5 +149,6 @@ class FileListItem extends StatelessWidget {
         ],
       ),
     );
+    */
   }
 }

@@ -1,6 +1,6 @@
 name: real_path_file_selector
 description: "flutter realpath file selector for android,linux and other platform.i current build 2 platform."
-version: 0.0.4
+version: 0.0.5
 homepage: https://github.com/ThanCoder/flutter_real_path_file_selector
 
 environment:

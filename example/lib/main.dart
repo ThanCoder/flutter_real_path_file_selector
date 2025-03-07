@@ -21,31 +21,38 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Future<void> _test() async {
+  Future<void> _fileExplor() async {
+    final pathList = await RealPathFileSelector.openFileExplorer.open(
+      context,
+      // mimeTypes: ['video'],
+      title: 'Choose Video File',
+      thumbnailDirPath: '/home/thancoder/Documents',
+    );
+    debugPrint(pathList.toString());
+  }
+
+  void _scanVideo() async {
     final scannerPathList = await RealPathFileSelector.openFileScanner.open(
       context,
-      mimeType: 'video',
+      mimeType: 'application/pdf',
       thumbnailDirPath: '/home/thancoder/Documents',
     );
     debugPrint(scannerPathList.toString());
-
-    // final pathList = await RealPathFileSelector.openFileExplorer.open(
-    //   context,
-    //   mimeTypes: ['video'],
-    //   title: 'Choose Video File',
-    //   thumbnailDirPath: '/home/thancoder/Documents',
-    // );
-    // debugPrint(pathList.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Real Path File Chooser')),
-      body: Placeholder(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _test,
-        child: Text('Test'),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 10,
+          children: [
+            TextButton(onPressed: _scanVideo, child: Text('Scan Video')),
+            TextButton(onPressed: _fileExplor, child: Text('File Explorer')),
+          ],
+        ),
       ),
     );
   }
